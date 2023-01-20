@@ -14,5 +14,6 @@ module.exports.controller = controller;
 module.exports.service = service;
 module.exports = controller(new service(jwt,cert));
 */
-export {VerifyRouter}
-export default AuthController(new AuthService(jwt.sign,cert));
+const auth =  AuthController(new AuthService(jwt.sign,cert));
+auth.all('/', VerifyRouter)
+export default auth
