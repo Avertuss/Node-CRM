@@ -1,0 +1,7 @@
+# Dependencies
+node_modules/
+packages/**/node_modules/
+yarn.lock
+packages/**/yarn.lock
+packages/**/yarn-error.log
+package-lock.json
