@@ -1,8 +1,8 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, Router } from 'express';
 
-
-var router : Router = express.Router(); 
+const path : string = "/user"
+const  router : Router = express.Router(); 
 export default function()
 {
-    return 
+    return router.post(path, function(){})
 }

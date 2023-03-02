@@ -1,0 +1,26 @@
+{
+    "test": {
+        "username": "test",
+        "roles": [
+            {
+                "id": 1,
+                "name": "manager"
+            }
+        ],
+        "permission": [
+            {
+                "id": 2,
+                "code": "contact",
+                "name": "Контакты",
+                "lvl": 3
+            }
+        ],
+        "menu": [
+            {
+                "name": "Контакты",
+                "icon": "",
+                "code": "contact"
+            }
+        ]
+    }
+}

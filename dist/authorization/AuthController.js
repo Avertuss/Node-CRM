@@ -7,10 +7,10 @@ exports.AuthController = void 0;
 var express_1 = __importDefault(require("express"));
 var router = express_1["default"].Router();
 function AuthController(service) {
-    return router.post('/login', function (req, res) {
-        console.log(req.body);
-        var token = service.login(req.body.username, "");
-        res.json({ idToken: token });
+    return router.post('/login', function (req, res, next) {
+        console.log(req);
+        var response = service.login(req.body);
+        res.json(response);
     });
 }
 exports.AuthController = AuthController;
