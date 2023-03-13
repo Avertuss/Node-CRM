@@ -1,0 +1,24 @@
+{
+    "name":"contact",
+    "columns":{
+        "id": {
+            "type":"bigint",
+            "primaryKey":true
+        },
+        "name":{
+            "type":"nvarchar",
+            "size":250,
+            "notNull":true
+        },
+        "code":{
+            "type":"nvarchar",
+            "size":250,
+            "notNull":true
+        },
+        "lvl":{
+            "type":"int",
+            "notNull":true,
+            "default":0
+        }
+    }
+}

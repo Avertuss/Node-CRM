@@ -1,0 +1,21 @@
+{
+    "1":{
+        "id": 1,
+        "name": "manager",
+        "permission":[
+            {
+                "id": 1,
+                "code": "contact",
+                "name": "Контакты",
+                "lvl": 3
+            },
+            {
+                "id": 2,
+                "code": "role",
+                "name": "Роли",
+                "lvl": 1
+            }
+        ]
+    }
+}
+        

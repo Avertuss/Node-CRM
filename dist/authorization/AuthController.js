@@ -8,7 +8,6 @@ var express_1 = __importDefault(require("express"));
 var router = express_1["default"].Router();
 function AuthController(service) {
     return router.post('/login', function (req, res, next) {
-        console.log(req);
         var response = service.login(req.body);
         res.json(response);
     });

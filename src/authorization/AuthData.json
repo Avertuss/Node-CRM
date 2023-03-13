@@ -9,10 +9,22 @@
         ],
         "permission": [
             {
-                "id": 2,
+                "id": 1,
                 "code": "contact",
                 "name": "Контакты",
                 "lvl": 3
+            },
+            {
+                "id": 2,
+                "code": "role",
+                "name": "Роли",
+                "lvl": 2
+            },
+            {
+                "id": 3,
+                "code": "user",
+                "name": "Пользователи",
+                "lvl": 1
             }
         ],
         "menu": [
@@ -20,6 +32,11 @@
                 "name": "Контакты",
                 "icon": "",
                 "code": "contact"
+            },
+            {
+                "name": "Настройки",
+                "icon": "",
+                "code": "settings"
             }
         ]
     }

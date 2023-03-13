@@ -10,8 +10,11 @@ function default_1(cert) {
         var token = authorization.replace(/^Bearer\s+/, "");
         jsonwebtoken_1["default"].verify(token, cert, function (err, decoded) {
             if (err == null) {
-                console.log(decoded); // bar
+                console.log(decoded);
                 next();
+            }
+            else {
+                res.status(401).send({ "message": "UNA" });
             }
         });
         next();

@@ -14,9 +14,11 @@ export class AuthService implements IAuthService{
     login(auth : AuthRequest) : AuthResponse
     {
         const payload = {
-            sub:auth.username
+            sub:auth.username,
+            permission: AuthData[auth.username].permission,
+            roles: AuthData[auth.username].roles
         }
-        let token : string = this.jwtSing(payload, this.cert, { algorithm: 'RS256', expiresIn: 120 });
+        let token : string = this.jwtSing(payload, this.cert, { algorithm: 'RS256', expiresIn: 36000 });
         
         return {
             idToken:token,

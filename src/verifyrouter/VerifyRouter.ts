@@ -14,6 +14,8 @@ export default function (cert : Buffer) :RequestHandler
         {
             console.log(decoded); // bar
             next();
+        }else {
+            res.status(401).send({"message":"UNA"})
         }    
       });
     next();

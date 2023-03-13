@@ -1,7 +1,7 @@
 "use strict";
 exports.__esModule = true;
 exports.RoleRepository = void 0;
-var RoleRepository = /** @class */ (function () {
+var RoleRepository = (function () {
     function RoleRepository() {
         this.cache = new Map();
     }

@@ -2,6 +2,7 @@
   "name": "sphera-core",
   "version": "1.0.0",
   "description": "\"core auth role access\"",
+
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

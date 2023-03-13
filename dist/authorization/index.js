@@ -8,10 +8,5 @@ var fs_1 = __importDefault(require("fs"));
 var keyCert = fs_1["default"].readFileSync('C:\\Work\\core\\secret\\key.pem');
 var AuthController_1 = require("./AuthController");
 var AuthService_1 = require("./AuthService");
-/*
-module.exports.controller = controller;
-module.exports.service = service;
-module.exports = controller(new service(jwt,cert));
-*/
 var auth = (0, AuthController_1.AuthController)(new AuthService_1.AuthService(jsonwebtoken_1["default"].sign, keyCert));
 exports["default"] = auth;
