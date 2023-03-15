@@ -1,13 +1,17 @@
-import {Filter, ICurdRepository, Page, toPage} from '../base'
+import {Filter, ICurdRepository, Page, toPage} from '../../base'
 import {RoleEntity,PermissionEntity} from './Entity';
-
+import { Bulder, IShema } from '../../json-sql';
 
 export class  RoleRepository implements ICurdRepository<number, RoleEntity<number>>
 {
     cache: Map<number,RoleEntity<number>>;
     sequins :number;
-    constructor()
+    private shema: IShema;
+    private builder: Bulder;
+    constructor(shema: IShema)
     {
+        this.shema = shema;
+        this.builder = new Bulder(shema);
         this.cache = new Map()
         this.cache.set(1,{"id": 1,
             "name": "manager","permission": new Set([
@@ -46,11 +50,16 @@ export class  RoleRepository implements ICurdRepository<number, RoleEntity<numbe
         });
     }
     getById(id: number): Promise<RoleEntity> {
+
+        let sql = this.builder.select().where("id",id).build();
+        console.log(sql);
         return new Promise((resolve)=>{
             resolve(this.cache.get(id));
         });
     }
     getAll(filter: Filter): Promise<Array<RoleEntity>> {
+        let sql = this.builder.select().build();
+        console.log(sql);
         return new Promise((resolve)=>{
             resolve(Array.from<RoleEntity>(this.cache.values()));
         });

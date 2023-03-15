@@ -61,7 +61,6 @@ var Service = (function () {
                     case 0: return [4, this.roleRepository.getAll(filter)];
                     case 1:
                         entitys = _a.sent();
-                        console.log(entitys);
                         return [2, { "data": entitys.map(this.convertEntityToResponse), "count": entitys.length }];
                 }
             });

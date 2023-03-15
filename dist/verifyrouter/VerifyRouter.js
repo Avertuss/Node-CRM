@@ -10,14 +10,14 @@ function default_1(cert) {
         var token = authorization.replace(/^Bearer\s+/, "");
         jsonwebtoken_1["default"].verify(token, cert, function (err, decoded) {
             if (err == null) {
-                console.log(decoded);
+                req.currentUser = decoded;
                 next();
             }
             else {
-                res.status(401).send({ "message": "UNA" });
+                res.status(401).send({ "message": "Unauthorized" }).end();
+                return;
             }
         });
-        next();
     };
 }
 exports["default"] = default_1;

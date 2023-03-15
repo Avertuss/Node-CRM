@@ -16,6 +16,7 @@ export interface IColumnBase extends IColumn
     size?:number,
     notNull?:boolean
 }
+
 export enum Comparison {
     EQUALS =  <any>"=",
     LESS =  <any>"<",
@@ -27,16 +28,18 @@ export enum Comparison {
     EXISTS =  <any>"EXISTS",
     LIKE = <any>"LIKE",
 }
-export interface IWhere
+
+export enum Operator {
+    AND = <any>"AND",
+    OR= <any>"OR",
+    NOT_EQUALS= <any>"<>",
+}
+export interface IWhere 
 {
-    operator?:string,
     enabled?:boolean,
-    visible?:boolean,
-    name:string,
     column:string,
     comparison:Comparison,
-    value?: any | Array<any>,
-    table?:string
+    operator?:Operator
 }
 export interface IWheres 
 {

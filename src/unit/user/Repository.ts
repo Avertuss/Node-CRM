@@ -1,4 +1,4 @@
-import {Filter, IRepository, Page} from '../base'
+import {Filter, IRepository, Page} from '../../base'
 import {RoleEntity} from './Entity';
 export class  RoleRepository implements IRepository<string, RoleEntity>
 {

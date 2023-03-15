@@ -35,41 +35,41 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
-exports.Service = void 0;
-var Service = (function () {
-    function Service(roleRepository) {
-        this.roleRepository = roleRepository;
-    }
-    Service.prototype.create = function (request) {
-        throw new Error('Method not implemented.');
+var express_1 = __importDefault(require("express"));
+var base_1 = require("../base");
+var router = express_1["default"].Router();
+var isPemite = function (lvl) {
+    return function (req, res, next) {
+        var code = req.params.folder;
+        var permission = req.currentUser.permission.find(function (per) { return per.code === code; });
+        if (permission.lvl >= lvl) {
+            next();
+        }
+        else {
+            res.status(403).send({ "message": "ACCESS_DENIED" });
+        }
+        return;
     };
-    Service.prototype.update = function (id, request) {
-        throw new Error('Method not implemented.');
-    };
-    Service.prototype["delete"] = function (id) {
-        throw new Error('Method not implemented.');
-    };
-    Service.prototype.getById = function (id) {
-        throw new Error('Method not implemented.');
-    };
-    Service.prototype.getAll = function (filter) {
+};
+function default_1(roleServise) {
+    router.get("/dictionary/:folder/:dictionary", isPemite(base_1.LVL.READ), function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
-            var entitys;
+            var data;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4, this.roleRepository.getAll(filter)];
+                    case 0: return [4, roleServise.getAll(req.query)];
                     case 1:
-                        entitys = _a.sent();
-                        console.log(entitys);
-                        return [2, { "data": entitys.map(this.convertEntityToResponse), "count": entitys.length }];
+                        data = _a.sent();
+                        res.send(data);
+                        return [2];
                 }
             });
         });
-    };
-    Service.prototype.convertEntityToResponse = function (entity) {
-        return entity;
-    };
-    return Service;
-}());
-exports.Service = Service;
+    });
+    return router;
+}
+exports["default"] = default_1;

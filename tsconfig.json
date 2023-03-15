@@ -2,14 +2,13 @@
     "compilerOptions": {
       "resolveJsonModule": true,
       "forceConsistentCasingInFileNames":true,
-      "module":"CommonJS",
       "esModuleInterop": true,
       "removeComments": true,
       "outDir": "dist",
-      "baseUrl": ".",
+      "baseUrl": "./src",
+      "types": ["node", "express"],
       "paths": {
-        "json-sql": ["src/json-sql"],
-        "src/*": ["src/*"]
+        "json-sql": ["json-sql"]
       }
     }
 }

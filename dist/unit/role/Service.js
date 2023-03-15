@@ -36,40 +36,51 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.Service = void 0;
-var Service = (function () {
-    function Service(roleRepository) {
+exports.RoleService = void 0;
+var RoleService = (function () {
+    function RoleService(roleRepository) {
         this.roleRepository = roleRepository;
     }
-    Service.prototype.create = function (request) {
-        throw new Error('Method not implemented.');
-    };
-    Service.prototype.update = function (id, request) {
-        throw new Error('Method not implemented.');
-    };
-    Service.prototype["delete"] = function (id) {
-        throw new Error('Method not implemented.');
-    };
-    Service.prototype.getById = function (id) {
-        throw new Error('Method not implemented.');
-    };
-    Service.prototype.getAll = function (filter) {
+    RoleService.prototype.getById = function (id) {
         return __awaiter(this, void 0, void 0, function () {
-            var entitys;
+            var entity;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4, this.roleRepository.getAll(filter)];
+                    case 0: return [4, this.roleRepository.getById(Number(id))];
                     case 1:
-                        entitys = _a.sent();
-                        console.log(entitys);
-                        return [2, { "data": entitys.map(this.convertEntityToResponse), "count": entitys.length }];
+                        entity = _a.sent();
+                        return [2, this.convertToIRoleResponse(entity)];
                 }
             });
         });
     };
-    Service.prototype.convertEntityToResponse = function (entity) {
-        return entity;
+    RoleService.prototype.getAll = function (filter) {
+        return __awaiter(this, void 0, void 0, function () {
+            var elements, page;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this.roleRepository.getAll(filter)];
+                    case 1:
+                        elements = _a.sent();
+                        page = { data: elements.map(function (e) { return _this.convertToIRoleResponse(e); }), count: elements.length };
+                        return [2, page];
+                }
+            });
+        });
     };
-    return Service;
+    RoleService.prototype.create = function (request) {
+        throw new Error('Method not implemented.');
+    };
+    RoleService.prototype.update = function (id, request) {
+        throw new Error('Method not implemented.');
+    };
+    RoleService.prototype["delete"] = function (id) {
+        throw new Error('Method not implemented.');
+    };
+    RoleService.prototype.convertToIRoleResponse = function (entity) {
+        return { id: entity.id, name: entity.name, permission: Array.from(entity.permission.values()) };
+    };
+    return RoleService;
 }());
-exports.Service = Service;
+exports.RoleService = RoleService;

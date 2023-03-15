@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
-exports.Comparison = void 0;
+exports.Operator = exports.Comparison = void 0;
 var Comparison;
 (function (Comparison) {
     Comparison[Comparison["EQUALS"] = "="] = "EQUALS";
@@ -13,3 +13,9 @@ var Comparison;
     Comparison[Comparison["EXISTS"] = "EXISTS"] = "EXISTS";
     Comparison[Comparison["LIKE"] = "LIKE"] = "LIKE";
 })(Comparison = exports.Comparison || (exports.Comparison = {}));
+var Operator;
+(function (Operator) {
+    Operator[Operator["AND"] = "AND"] = "AND";
+    Operator[Operator["OR"] = "OR"] = "OR";
+    Operator[Operator["NOT_EQUALS"] = "<>"] = "NOT_EQUALS";
+})(Operator = exports.Operator || (exports.Operator = {}));

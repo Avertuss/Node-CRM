@@ -1,12 +1,9 @@
-import { Filter, Page } from 'src/base';
+import { Filter, Page } from '../../base';
 import { IRoleRequest, IRoleResponse, IRoleService, IPermission } from './types';
-import { RoleRepository } from './Repository';
+import { RoleRepository } from './RoleRepository';
 import { RoleEntity } from './Entity';
-import fs from 'fs';
 
-export class UserService {
 
-}
 
 export class RoleService implements IRoleService {
     roleRepository: RoleRepository

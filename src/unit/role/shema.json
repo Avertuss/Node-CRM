@@ -1,0 +1,42 @@
+{
+    "name": "role",
+    "columns": {
+        "id": {
+            "type": "bigint",
+            "primaryKey": true
+        },
+        "name": {
+            "type": "nvarchar",
+            "size": 250,
+            "notNull": true
+        },
+        "code": {
+            "type": "nvarchar",
+            "size": 250,
+            "notNull": true
+        },
+        "permission": {
+            "type": "bigint",
+            "joinTable": {
+                "table": "entity_shema"
+            },
+            "relationship": {
+                "manyToMany": {
+                    "table": "role_to_entity_shema",
+                    "joinColumns": "role_id",
+                    "inverseJoinColumns": "entity_shema_id"
+                }
+            }
+        }
+    },
+    "where": {
+        "id": {
+            "column": "id",
+            "comparison": "EQUALS"
+        },
+        "name": {
+            "column": "name",
+            "like": "value"
+        }
+    }
+}

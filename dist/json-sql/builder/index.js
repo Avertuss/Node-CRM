@@ -2,6 +2,12 @@
 exports.__esModule = true;
 exports.Bulder = void 0;
 var SHEMA_DEFAULT_NAME = "dbo";
+var WhereBuilder = (function () {
+    function WhereBuilder(wheres) {
+        this.wheres = wheres;
+    }
+    return WhereBuilder;
+}());
 var SelectBuilder = (function () {
     function SelectBuilder(shema) {
         this.SELECT_SQL = "";
@@ -24,7 +30,16 @@ var SelectBuilder = (function () {
             .map(function (key) { return _this.generateSelectSQLColumn(key, typeof columns[key] === "object" ? columns[key] : null); });
         return this;
     };
-    SelectBuilder.prototype.where = function (filters) {
+    SelectBuilder.prototype.where = function (filterKey, value, enabled) {
+        var _a, _b;
+        if (enabled === void 0) { enabled = true; }
+        if (filterKey != null && ((_b = (_a = this.shema) === null || _a === void 0 ? void 0 : _a.where) === null || _b === void 0 ? void 0 : _b[filterKey])) {
+            console.log(filterKey);
+            var where_1 = this.shema.where[filterKey];
+            where_1.enabled = enabled;
+            var col = this.SHEMA_COLUMNS_SELECT.find(function (col) { return col.name === where_1.column; });
+            this.SHEMA_WHERE.push(this.toWhere(where_1, col, value));
+        }
         return this;
     };
     SelectBuilder.prototype.build = function () {
@@ -55,6 +70,14 @@ var SelectBuilder = (function () {
     };
     SelectBuilder.prototype.concatColName = function (col) {
         return "[".concat(col.table, "].[").concat(col.name, "] ").concat(col.alias ? "as [".concat(col.alias, "]") : "");
+    };
+    SelectBuilder.prototype.toWhere = function (where, col, value) {
+        return {
+            column: col,
+            comparison: where.comparison,
+            operator: where.hasOwnProperty("operator") ? where.operator : "AND",
+            value: value
+        };
     };
     return SelectBuilder;
 }());

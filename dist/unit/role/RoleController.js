@@ -35,41 +35,73 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
-exports.Service = void 0;
-var Service = (function () {
-    function Service(roleRepository) {
-        this.roleRepository = roleRepository;
-    }
-    Service.prototype.create = function (request) {
-        throw new Error('Method not implemented.');
-    };
-    Service.prototype.update = function (id, request) {
-        throw new Error('Method not implemented.');
-    };
-    Service.prototype["delete"] = function (id) {
-        throw new Error('Method not implemented.');
-    };
-    Service.prototype.getById = function (id) {
-        throw new Error('Method not implemented.');
-    };
-    Service.prototype.getAll = function (filter) {
+var express_1 = __importDefault(require("express"));
+var base_1 = require("../../base");
+var permisson_util_1 = require("../../base/permisson-util");
+var router = express_1["default"].Router();
+function default_1(roleServise, path) {
+    router.get("/role", (0, permisson_util_1.isPemite)(base_1.LVL.READ, 'role'), function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
-            var entitys;
+            var data;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4, this.roleRepository.getAll(filter)];
+                    case 0: return [4, roleServise.getAll(req.query)];
                     case 1:
-                        entitys = _a.sent();
-                        console.log(entitys);
-                        return [2, { "data": entitys.map(this.convertEntityToResponse), "count": entitys.length }];
+                        data = _a.sent();
+                        res.send(data);
+                        return [2];
                 }
             });
         });
-    };
-    Service.prototype.convertEntityToResponse = function (entity) {
-        return entity;
-    };
-    return Service;
-}());
-exports.Service = Service;
+    });
+    router.get("/role/:id", (0, permisson_util_1.isPemite)(base_1.LVL.READ, 'role'), function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, roleServise.getById(req.params.id)];
+                    case 1:
+                        data = _a.sent();
+                        console.log(data);
+                        res.send(data);
+                        return [2];
+                }
+            });
+        });
+    });
+    router.post("/role", (0, permisson_util_1.isPemite)(base_1.LVL.UPDATE, 'role'), function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data;
+            return __generator(this, function (_a) {
+                data = roleServise.create(req.body);
+                res.send(data);
+                return [2];
+            });
+        });
+    });
+    router.patch("/role/:id", (0, permisson_util_1.isPemite)(base_1.LVL.UPDATE, 'role'), function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data;
+            return __generator(this, function (_a) {
+                data = roleServise.update(req.params.id, req.body);
+                res.send(data);
+                return [2];
+            });
+        });
+    });
+    return router["delete"]("/role/:id", (0, permisson_util_1.isPemite)(base_1.LVL.DELETE, 'role'), function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data;
+            return __generator(this, function (_a) {
+                data = roleServise["delete"](req.params.id);
+                res.send(data);
+                return [2];
+            });
+        });
+    });
+}
+exports["default"] = default_1;

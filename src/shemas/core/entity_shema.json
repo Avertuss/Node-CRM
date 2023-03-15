@@ -1,0 +1,27 @@
+{
+    "name":"entity_shema",
+    "columns":{
+        "id": {
+            "type":"bigint",
+            "primaryKey":true
+        },
+        "type":{
+            "type":"bigint",
+            "table":"entity_type"
+        },
+        "name":{
+            "type":"nvarchar",
+            "size":250,
+            "notNull":true
+        },
+        "code":{
+            "type":"nvarchar",
+            "size":250,
+            "notNull":true
+        },
+        "shema":{
+            "type":"jsonb",
+            "notNull":true
+        }
+    }
+}

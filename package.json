@@ -2,7 +2,6 @@
   "name": "sphera-core",
   "version": "1.0.0",
   "description": "\"core auth role access\"",
-
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,7 +9,7 @@
     "build": "npx tsc",
     "tsx:watch": "npx tsc --watch",
     "nodemon": "nodemon -q dist/index.js",
-    "dev": "npm-run-all -p nodemon tsx:watch"
+    "dev": "npm-run-all -p nodemon tsx:watch "
   },
   "author": "",
   "license": "ISC",

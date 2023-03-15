@@ -1,0 +1,14 @@
+{
+    "name":"entity_type",
+    "columns":{
+        "id": {
+            "type":"bigint",
+            "primaryKey":true
+        },
+        "name":{
+            "type":"nvarchar",
+            "size":250,
+            "notNull":true
+        }
+    }
+}

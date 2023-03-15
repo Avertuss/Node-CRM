@@ -40,10 +40,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 exports.__esModule = true;
 var express_1 = __importDefault(require("express"));
-var base_1 = require("src/base");
+var base_1 = require("../base");
 var router = express_1["default"].Router();
-var isPemite = function (lvl, code) {
+var isPemite = function (lvl) {
     return function (req, res, next) {
+        var paths = req.path.split("/");
+        var code = req.params.custom;
         var permission = req.currentUser.permission.find(function (per) { return per.code === code; });
         if (permission.lvl >= lvl) {
             next();
@@ -51,10 +53,11 @@ var isPemite = function (lvl, code) {
         else {
             res.status(403).send({ "message": "ACCESS_DENIED" });
         }
+        return;
     };
 };
 function default_1(roleServise) {
-    router.get("/contact", isPemite(base_1.LVL.READ, 'role'), function (req, res, next) {
+    return router.get("/custom/:custom", isPemite(base_1.LVL.READ), function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var data;
             return __generator(this, function (_a) {
@@ -62,6 +65,7 @@ function default_1(roleServise) {
                     case 0: return [4, roleServise.getAll(req.query)];
                     case 1:
                         data = _a.sent();
+                        console.log(data);
                         res.send(data);
                         return [2];
                 }

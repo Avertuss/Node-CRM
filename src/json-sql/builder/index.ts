@@ -2,15 +2,24 @@ import { IShema, IColumns, IColumn, IColumnDictionary, IColumnBase, IWhere, IWhe
 interface Column {
     table: string,
     name: string,
-    alias?: string,
+    alias: string,
 }
 interface Where {
-    column: string,
+    column: Column,
     comparison: Comparison,
     operator: string,
     value?: any
 }
 const SHEMA_DEFAULT_NAME = "dbo"
+class WhereBuilder {
+    private wheres: IWheres;
+    private SHEMA_WHERE: Array<Where>;
+    constructor(wheres: IWheres) {
+        this.wheres = wheres;
+    }
+
+}
+
 class SelectBuilder {
     private shema: IShema
     private SELECT_SQL: string = "";
@@ -34,7 +43,15 @@ class SelectBuilder {
 
         return this;
     }
-    public where(filters: IWheres): SelectBuilder {
+
+    public where(filterKey?: string, value?: any, enabled: boolean = true): SelectBuilder {
+        if (filterKey != null && this.shema?.where?.[filterKey]) {
+            console.log(filterKey);
+            const where: IWhere = (this.shema.where[filterKey] as IWhere)
+            where.enabled = enabled;
+            let col: Column = this.SHEMA_COLUMNS_SELECT.find(col => col.name === where.column)
+            this.SHEMA_WHERE.push(this.toWhere(where, col,value))
+        }
         return this;
     }
     public build(): string {
@@ -55,7 +72,7 @@ class SelectBuilder {
             }
         }
         else {
-            this.SHEMA_COLUMNS_SELECT.push({ table:this.TABLE_ALIAS, name: key, alias: key });
+            this.SHEMA_COLUMNS_SELECT.push({ table: this.TABLE_ALIAS, name: key, alias: key });
         }
     }
     private concatTableName(tableName: string, tableAlias: string, shema: string = SHEMA_DEFAULT_NAME) {
@@ -63,6 +80,14 @@ class SelectBuilder {
     }
     private concatColName(col: Column): string {
         return `[${col.table}].[${col.name}] ${col.alias ? `as [${col.alias}]` : ""}`;
+    }
+    private toWhere(where: IWhere, col: Column, value?: any): Where {
+        return {
+            column: col,
+            comparison: where.comparison,
+            operator: where.hasOwnProperty("operator") ? where.operator : "AND",
+            value: value
+        } as Where
     }
 
 }
@@ -78,12 +103,12 @@ export class Bulder {
         this.selectlBuilder = new SelectBuilder(shema);
     }
     public select(columns?: IColumns): SelectBuilder {
-        if(columns! = null){
+        if (columns! = null) {
             return this.selectlBuilder.select(columns)
         }
-       else {
-           return this.selectlBuilder;
-       }
+        else {
+            return this.selectlBuilder;
+        }
 
     }
     public update(): string {

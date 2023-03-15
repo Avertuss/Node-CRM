@@ -1,10 +1,10 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import Authorization from './authorization';
 import VerifyRoute from './verifyrouter';
-import {roleController} from './unit';
+import {roleController} from './unit/role';
 
-import {Controller} from './custom';
+import {Controller} from './dictionarys';
 
 dotenv.config();
 const app: Express = express();

@@ -3,7 +3,6 @@ import { Request, Response } from 'express';
 import * as core from 'express-serve-static-core';
 
 export interface IRepository<T,E>{
-    
 }
 
 export interface IBaseResponse<T>
@@ -33,7 +32,7 @@ export interface IBaseEntity<T>
 {
     id:T,
     createdOn: Date,
-    createdBy:CurrentUser
+    createdBy:UserInfo
     name:string
 }
 export interface IBaseService<T, E>
@@ -66,7 +65,12 @@ export type Permission =
     name: string,
     lvl: LVL
 }
-export type CurrentUser ={
+export type UserInfo = 
+{
+    id: string,
+    name: string
+}
+export type CurrentUser = {
     sub: string,
     permission: Array<Permission>,
     roles:Array<any>
