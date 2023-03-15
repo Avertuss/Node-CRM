@@ -34,16 +34,21 @@ export enum Operator {
     OR= <any>"OR",
     NOT_EQUALS= <any>"<>",
 }
-export interface IWhere 
+export interface Filter
+{
+    
+}
+export interface IWhereCondition
 {
     enabled?:boolean,
     column:string,
     comparison:Comparison,
-    operator?:Operator
+    operator?:Operator,
+    visible?:boolean
 }
 export interface IWheres 
 {
-    [key:string]:IWhere
+    [key:string]:IWhereCondition
 }
 export interface IColumns 
 {

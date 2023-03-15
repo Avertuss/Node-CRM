@@ -1,8 +1,9 @@
 
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
+import path from 'path';
 
-var keyCert : Buffer = fs.readFileSync('C:\\Work\\core\\secret\\key.pem');
+const keyCert : Buffer = fs.readFileSync(path.join(__dirname, '../../secret/key.pem'));
 
 import {AuthController} from './AuthController';
 import {AuthService} from './AuthService';

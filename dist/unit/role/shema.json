@@ -32,11 +32,7 @@
     "where": {
         "id": {
             "column": "id",
-            "comparison": "EQUALS"
-        },
-        "name": {
-            "column": "name",
-            "like": "value"
+            "comparison": "="
         }
     }
 }

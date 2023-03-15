@@ -22,22 +22,24 @@ var SelectBuilder = (function () {
     SelectBuilder.prototype.select = function (columns) {
         var _this = this;
         var columnsKeys = Object.keys(columns);
+        this.SHEMA_COLUMNS_SELECT = Array();
         columnsKeys.filter(function (key) {
             var _a, _b;
             return typeof columns[key] === "string" || typeof columns[key] === "object" &&
                 (typeof ((_a = columns[key]) === null || _a === void 0 ? void 0 : _a.select) === "undefined" || ((_b = columns[key]) === null || _b === void 0 ? void 0 : _b.select) == true);
         })
             .map(function (key) { return _this.generateSelectSQLColumn(key, typeof columns[key] === "object" ? columns[key] : null); });
+        console.log(this.SHEMA_COLUMNS_SELECT);
         return this;
     };
     SelectBuilder.prototype.where = function (filterKey, value, enabled) {
         var _a, _b;
         if (enabled === void 0) { enabled = true; }
         if (filterKey != null && ((_b = (_a = this.shema) === null || _a === void 0 ? void 0 : _a.where) === null || _b === void 0 ? void 0 : _b[filterKey])) {
-            console.log(filterKey);
             var where_1 = this.shema.where[filterKey];
             where_1.enabled = enabled;
             var col = this.SHEMA_COLUMNS_SELECT.find(function (col) { return col.name === where_1.column; });
+            console.log(this.SHEMA_COLUMNS_SELECT);
             this.SHEMA_WHERE.push(this.toWhere(where_1, col, value));
         }
         return this;
@@ -45,10 +47,9 @@ var SelectBuilder = (function () {
     SelectBuilder.prototype.build = function () {
         return this.SELECT_SQL = "SELECT " + this.SHEMA_COLUMNS_SELECT.map(this.concatColName).join(",") + " FROM "
             + this.concatTableName(this.shema.name, this.shema.alias)
-            + (this.SHEMA_WHERE.length > 0 ? (" WHERE " + this.SHEMA_WHERE.join(" ")) : "");
+            + (this.SHEMA_WHERE.length > 0 ? (" WHERE " + this.SHEMA_WHERE.map(this.whereToSQL).join(" ")) : "");
     };
     SelectBuilder.prototype.generateSelectSQLColumn = function (key, col) {
-        this.SHEMA_COLUMNS_SELECT = Array();
         if (col && typeof col === "object") {
             if (typeof (col === null || col === void 0 ? void 0 : col.table) === "string") {
                 var colDictionary = col;
@@ -63,6 +64,9 @@ var SelectBuilder = (function () {
         else {
             this.SHEMA_COLUMNS_SELECT.push({ table: this.TABLE_ALIAS, name: key, alias: key });
         }
+    };
+    SelectBuilder.prototype.whereToSQL = function (where) {
+        return "[".concat(where.column.alias, "].[").concat(where.column.name, "] ").concat(where.comparison, " ").concat(where.value);
     };
     SelectBuilder.prototype.concatTableName = function (tableName, tableAlias, shema) {
         if (shema === void 0) { shema = SHEMA_DEFAULT_NAME; }

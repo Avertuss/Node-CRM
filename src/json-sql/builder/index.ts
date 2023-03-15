@@ -1,4 +1,4 @@
-import { IShema, IColumns, IColumn, IColumnDictionary, IColumnBase, IWhere, IWheres, Comparison, } from '../type';
+import { IShema, IColumns, IColumn, IColumnDictionary, IColumnBase, IWhereCondition, IWheres, Comparison, } from '../type';
 interface Column {
     table: string,
     name: string,
@@ -36,20 +36,22 @@ class SelectBuilder {
     }
     public select(columns: IColumns): SelectBuilder {
         const columnsKeys = Object.keys(columns);
+        this.SHEMA_COLUMNS_SELECT = Array<Column>();
         columnsKeys.filter(key => typeof columns[key] === "string" || typeof columns[key] === "object" &&
             (typeof (columns[key] as IColumn)?.select === "undefined" || (columns[key] as IColumn)?.select == true)
         )
             .map(key => this.generateSelectSQLColumn(key, typeof columns[key] === "object" ? (columns[key] as IColumn) : null));
-
+            console.log(this.SHEMA_COLUMNS_SELECT);
         return this;
     }
 
     public where(filterKey?: string, value?: any, enabled: boolean = true): SelectBuilder {
         if (filterKey != null && this.shema?.where?.[filterKey]) {
-            console.log(filterKey);
-            const where: IWhere = (this.shema.where[filterKey] as IWhere)
+           
+            const where: IWhereCondition = this.shema.where[filterKey] 
             where.enabled = enabled;
-            let col: Column = this.SHEMA_COLUMNS_SELECT.find(col => col.name === where.column)
+            let col: Column = this.SHEMA_COLUMNS_SELECT.find(col => col.name === where.column);
+            console.log(this.SHEMA_COLUMNS_SELECT)
             this.SHEMA_WHERE.push(this.toWhere(where, col,value))
         }
         return this;
@@ -57,16 +59,17 @@ class SelectBuilder {
     public build(): string {
         return this.SELECT_SQL = "SELECT " + this.SHEMA_COLUMNS_SELECT.map(this.concatColName).join(",") + " FROM "
             + this.concatTableName(this.shema.name, this.shema.alias)
-            + (this.SHEMA_WHERE.length > 0 ? (" WHERE " + this.SHEMA_WHERE.join(" ")) : "");
+            + (this.SHEMA_WHERE.length > 0 ? (" WHERE " + this.SHEMA_WHERE.map(this.whereToSQL).join(" ")) : "");
     }
     private generateSelectSQLColumn(key: string, col: IColumn): void {
-        this.SHEMA_COLUMNS_SELECT = Array<Column>();
+       
         if (col && typeof col === "object") {
             if (typeof (col as IColumnDictionary)?.table === "string") {
                 let colDictionary: IColumnDictionary = col as IColumnDictionary
                 this.SHEMA_COLUMNS_SELECT.push({ table: this.TABLE_ALIAS, name: (key + "Id"), alias: (key + "Id") });
                 this.SHEMA_COLUMNS_SELECT.push({ table: colDictionary.table, name: colDictionary.display, alias: (key + colDictionary.display) });
             } else {
+               
                 let colBase: IColumnBase = col as IColumnBase;
                 this.SHEMA_COLUMNS_SELECT.push({ table: this.TABLE_ALIAS, name: key, alias: colBase?.alias ? colBase.alias : key });
             }
@@ -75,13 +78,17 @@ class SelectBuilder {
             this.SHEMA_COLUMNS_SELECT.push({ table: this.TABLE_ALIAS, name: key, alias: key });
         }
     }
+    private whereToSQL(where: Where)
+    {
+        return `[${where.column.alias}].[${where.column.name}] ${where.comparison} ${where.value}`;
+    }
     private concatTableName(tableName: string, tableAlias: string, shema: string = SHEMA_DEFAULT_NAME) {
         return `[${shema}].[${tableName}] as [${tableAlias ? tableAlias : tableName}]`;
     }
     private concatColName(col: Column): string {
         return `[${col.table}].[${col.name}] ${col.alias ? `as [${col.alias}]` : ""}`;
     }
-    private toWhere(where: IWhere, col: Column, value?: any): Where {
+    private toWhere(where: IWhereCondition, col: Column, value?: any): Where {
         return {
             column: col,
             comparison: where.comparison,
@@ -99,7 +106,7 @@ export class Bulder {
 
     constructor(shema: IShema) {
         this.shema = shema;
-
+        
         this.selectlBuilder = new SelectBuilder(shema);
     }
     public select(columns?: IColumns): SelectBuilder {

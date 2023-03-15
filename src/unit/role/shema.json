@@ -28,15 +28,12 @@
                 }
             }
         }
+      
     },
-    "where": {
-        "id": {
-            "column": "id",
-            "comparison": "EQUALS"
-        },
-        "name": {
-            "column": "name",
-            "like": "value"
+    "where":{
+        "id":{
+            "column":"id",
+            "comparison":"="
         }
     }
 }
