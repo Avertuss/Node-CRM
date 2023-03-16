@@ -29,11 +29,5 @@
             }
         }
       
-    },
-    "where":{
-        "id":{
-            "column":"id",
-            "comparison":"="
-        }
     }
 }

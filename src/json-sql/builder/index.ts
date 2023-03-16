@@ -1,21 +1,42 @@
-import { IShema, IColumns, IColumn, IColumnDictionary, IColumnBase, IWhereCondition, IWheres, Comparison, } from '../type';
-interface Column {
-    table: string,
-    name: string,
-    alias: string,
-}
-interface Where {
-    column: Column,
-    comparison: Comparison,
-    operator: string,
-    value?: any
-}
+import { IShema, IColumns, IColumn, IColumnDictionary, IColumnBase, IFilter, WhereChainType, Comparison, Operator, SQLColumn, SQLWhere } from '../type';
+
 const SHEMA_DEFAULT_NAME = "dbo"
+
+
+function whereToSQL(where: IFilter, index?: number) {
+    return `[${( where.column as SQLColumn).alias}].[${( where.column as SQLColumn).name}] ${where.comparison} $${index}`;
+}
+function concatTableName(tableName: string, tableAlias: string, shema: string = SHEMA_DEFAULT_NAME) {
+    return `[${shema}].[${tableName}] as [${tableAlias ? tableAlias : tableName}]`;
+}
+function concatColName(col: SQLColumn): string {
+    return `[${col.table}].[${col.name}] ${col.alias ? `as [${col.alias}]` : ""}`;
+}
+function toWhere(comparison: Comparison, col: SQLColumn): SQLWhere {
+    return {
+        column: col,
+        comparison: comparison,
+    } as SQLWhere
+}
+function generateSQLWhere(whereChain: WhereChainType,indexSequens: number= 1): string {
+    let WHERE_SQL = ""
+        whereChain.forEach(e => {
+            if ((e as IFilter).column) {
+                let fil: IFilter = e  as IFilter;
+                WHERE_SQL+=" "+whereToSQL(fil,indexSequens++);
+            } else if (Array.isArray(e)) {
+                WHERE_SQL+=" ( "+generateSQLWhere(e as WhereChainType, indexSequens)+" ) ";
+            } else if (Object.values(Operator).includes(e as Operator)) {
+                WHERE_SQL+=" "+(e as Operator);
+            }
+        })
+    return WHERE_SQL;
+}
 class WhereBuilder {
-    private wheres: IWheres;
-    private SHEMA_WHERE: Array<Where>;
-    constructor(wheres: IWheres) {
-        this.wheres = wheres;
+    private whereChain: WhereChainType;
+    private SHEMA_WHERE: Array<SQLWhere>;
+    constructor(whereChain: WhereChainType) {
+        this.whereChain = whereChain;
     }
 
 }
@@ -24,52 +45,64 @@ class SelectBuilder {
     private shema: IShema
     private SELECT_SQL: string = "";
     private WHERE_SQL: string = "";
-    private SHEMA_COLUMNS_SELECT = Array<Column>();
-    private SHEMA_WHERE: Array<Where>;
+    private SHEMA_COLUMNS_SELECT = Array<SQLColumn>();
+    private SHEMA_WHERE: WhereChainType = [];
     private TABLE_ALIAS: string;
     private SHEMA_JOIN = Array<any>();
+    private whereBuilder: WhereBuilder;
+    private id: SQLColumn;
+    private indexValue:number = 1;
     constructor(shema: IShema) {
         this.shema = shema;
-        this.SHEMA_WHERE = new Array<Where>();
         this.TABLE_ALIAS = shema.alias ? shema.alias : shema.name;
         this.select(shema.columns);
+        this.whereBuilder = new WhereBuilder(shema.where);
+
     }
     public select(columns: IColumns): SelectBuilder {
         const columnsKeys = Object.keys(columns);
-        this.SHEMA_COLUMNS_SELECT = Array<Column>();
+        this.SHEMA_COLUMNS_SELECT = Array<SQLColumn>();
         columnsKeys.filter(key => typeof columns[key] === "string" || typeof columns[key] === "object" &&
             (typeof (columns[key] as IColumn)?.select === "undefined" || (columns[key] as IColumn)?.select == true)
         )
             .map(key => this.generateSelectSQLColumn(key, typeof columns[key] === "object" ? (columns[key] as IColumn) : null));
-            console.log(this.SHEMA_COLUMNS_SELECT);
+
+        this.SHEMA_WHERE.length > 0 ? (this.SHEMA_WHERE = []) : null;
+        return this;
+    }
+    public byId(): SelectBuilder {
+        if (this.SHEMA_WHERE.length > 0) {
+            this.SHEMA_WHERE = [[{ column: this.id, comparison: Comparison.EQUALS }], Operator.AND, [...this.SHEMA_WHERE]]
+        } else {
+            this.SHEMA_WHERE = [{ column: this.id, comparison: Comparison.EQUALS }]
+        }
+     
+        return this;
+    }
+    public where(filter: WhereChainType): SelectBuilder {
         return this;
     }
 
-    public where(filterKey?: string, value?: any, enabled: boolean = true): SelectBuilder {
-        if (filterKey != null && this.shema?.where?.[filterKey]) {
-           
-            const where: IWhereCondition = this.shema.where[filterKey] 
-            where.enabled = enabled;
-            let col: Column = this.SHEMA_COLUMNS_SELECT.find(col => col.name === where.column);
-            console.log(this.SHEMA_COLUMNS_SELECT)
-            this.SHEMA_WHERE.push(this.toWhere(where, col,value))
-        }
-        return this;
-    }
     public build(): string {
-        return this.SELECT_SQL = "SELECT " + this.SHEMA_COLUMNS_SELECT.map(this.concatColName).join(",") + " FROM "
-            + this.concatTableName(this.shema.name, this.shema.alias)
-            + (this.SHEMA_WHERE.length > 0 ? (" WHERE " + this.SHEMA_WHERE.map(this.whereToSQL).join(" ")) : "");
+        this.indexValue = 1;
+        console.log(this.SHEMA_WHERE);
+        return this.buildSelect() + generateSQLWhere(this.SHEMA_WHERE)
+
+    }
+    private buildSelect(): string {
+        this.SELECT_SQL = "SELECT " + this.SHEMA_COLUMNS_SELECT.map(concatColName).join(",") + " FROM "
+            + concatTableName(this.shema.name, this.shema.alias);
+        return this.SELECT_SQL;
     }
     private generateSelectSQLColumn(key: string, col: IColumn): void {
-       
+
         if (col && typeof col === "object") {
             if (typeof (col as IColumnDictionary)?.table === "string") {
                 let colDictionary: IColumnDictionary = col as IColumnDictionary
                 this.SHEMA_COLUMNS_SELECT.push({ table: this.TABLE_ALIAS, name: (key + "Id"), alias: (key + "Id") });
                 this.SHEMA_COLUMNS_SELECT.push({ table: colDictionary.table, name: colDictionary.display, alias: (key + colDictionary.display) });
             } else {
-               
+
                 let colBase: IColumnBase = col as IColumnBase;
                 this.SHEMA_COLUMNS_SELECT.push({ table: this.TABLE_ALIAS, name: key, alias: colBase?.alias ? colBase.alias : key });
             }
@@ -78,25 +111,6 @@ class SelectBuilder {
             this.SHEMA_COLUMNS_SELECT.push({ table: this.TABLE_ALIAS, name: key, alias: key });
         }
     }
-    private whereToSQL(where: Where)
-    {
-        return `[${where.column.alias}].[${where.column.name}] ${where.comparison} ${where.value}`;
-    }
-    private concatTableName(tableName: string, tableAlias: string, shema: string = SHEMA_DEFAULT_NAME) {
-        return `[${shema}].[${tableName}] as [${tableAlias ? tableAlias : tableName}]`;
-    }
-    private concatColName(col: Column): string {
-        return `[${col.table}].[${col.name}] ${col.alias ? `as [${col.alias}]` : ""}`;
-    }
-    private toWhere(where: IWhereCondition, col: Column, value?: any): Where {
-        return {
-            column: col,
-            comparison: where.comparison,
-            operator: where.hasOwnProperty("operator") ? where.operator : "AND",
-            value: value
-        } as Where
-    }
-
 }
 
 export class Bulder {
@@ -106,7 +120,7 @@ export class Bulder {
 
     constructor(shema: IShema) {
         this.shema = shema;
-        
+
         this.selectlBuilder = new SelectBuilder(shema);
     }
     public select(columns?: IColumns): SelectBuilder {
@@ -125,41 +139,4 @@ export class Bulder {
         return "";
     }
 
-    /*
-    
-    function toWhere(column: string,
-        comparison: Comparison,
-        operator: string,
-        value?: any): Where {
-        return {
-            column,
-            comparison,
-            operator,
-            value,
-        }
-    }
-
-
-
-   
-    let filterKey = Object.keys(shema.where);
-    filterKey.filter(key => (shema.where[key] as IWhere).enabled)
-        .map(key => {
-            let where: IWhere = shema.where[key];
-            let col = SHEMA_COLUMNS_SELECT.find(c => c.name === where.column);
-            let stringComparison: Where = null;
-            switch (where.comparison) {
-                case Comparison.EQUALS:
-                    stringComparison = toWhere( concatColName({ table: col.table, name: col.name }),Comparison.EQUALS, where.operator)
-                    break;
-                case Comparison.EXISTS:
-                    stringComparison = toWhere( `( SELECT * FROM [${where.table}] AS [${where.table}]_ WHERE [${where.table}_].[id] = ${concatColName({ table: col.table, name: col.name })} )`,Comparison.EXISTS, where.operator)
-                    break;
-            }
-            if (!!stringComparison)
-                SHEMA_WHERE.push(stringComparison)
-        })
-    
-    console.log(SELECT_COLUMNS);
-    */
 }

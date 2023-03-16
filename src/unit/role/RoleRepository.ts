@@ -51,7 +51,7 @@ export class  RoleRepository implements ICurdRepository<number, RoleEntity<numbe
     }
     getById(id: number): Promise<RoleEntity> {
 
-        let sql = this.builder.select().where("id",id).build();
+        let sql = this.builder.select().byId().build();
         console.log(sql);
         return new Promise((resolve)=>{
             resolve(this.cache.get(id));

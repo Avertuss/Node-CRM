@@ -28,28 +28,27 @@ export enum Comparison {
     EXISTS =  <any>"EXISTS",
     LIKE = <any>"LIKE",
 }
-
+export interface SQLColumn {
+    table: string,
+    name: string,
+    alias: string,
+}
+export interface SQLWhere {
+    column: SQLColumn,
+    comparison: Comparison,
+}
 export enum Operator {
     AND = <any>"AND",
-    OR= <any>"OR",
+    OR = <any>"OR",
     NOT_EQUALS= <any>"<>",
 }
-export interface Filter
-{
-    
-}
-export interface IWhereCondition
-{
-    enabled?:boolean,
-    column:string,
+export interface IFilter {
+    column:string | SQLColumn,
     comparison:Comparison,
-    operator?:Operator,
-    visible?:boolean
-}
-export interface IWheres 
-{
-    [key:string]:IWhereCondition
-}
+    value?:any,
+} 
+export type WhereChainType = Array<IFilter | Operator | WhereChainType> ;
+
 export interface IColumns 
 {
     [key:string]:IColumn | string
@@ -59,5 +58,5 @@ export interface IShema
     name:string,
     alias?:string,
     columns:IColumns,
-    where?:IWheres
+    where?:WhereChainType
 }

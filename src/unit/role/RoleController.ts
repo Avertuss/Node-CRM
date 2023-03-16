@@ -12,7 +12,6 @@ export default function (roleServise: IRoleService, path: string) {
     });
     router.get("/role/:id", isPemite(LVL.READ, 'role'), async function (req: IRequest, res: Response, next: NextFunction) {
         const data = await roleServise.getById(req.params.id);
-        console.log(data);
         res.send(data);
     });
     router.post("/role", isPemite(LVL.UPDATE, 'role'), async function (req: IRequestTypeBody<IRoleRequest>, res: Response, next: NextFunction) {

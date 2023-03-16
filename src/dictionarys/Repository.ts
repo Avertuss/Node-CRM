@@ -16,7 +16,7 @@ export class Repository implements ICurdRepository<any, IDictionaryEntity>
     update(entity: IDictionaryEntity): Promise<IDictionaryEntity> {
         throw new Error('Method not implemented.');
     }
-    delete(id: any): Promise<IDictionaryEntity> {
+    delete(id: any): Promise<IDictionaryEntity> { 
         throw new Error('Method not implemented.');
     }
     getById(id: any): Promise<IDictionaryEntity> {
@@ -24,11 +24,7 @@ export class Repository implements ICurdRepository<any, IDictionaryEntity>
     }
     getAll(filter: Filter): Promise<Array<IDictionaryEntity>> {
         let select = this.builder.select().build();
-        console.log(select)
-        return new Promise((resolve) => {
-            let data: IDictionaryEntity =  {id:10,createdOn: new Date( Date.now()),createdBy:{"id": "1", name:"system"},"name":"custom"} 
-            resolve([data])
-         });
+        throw new Error('Method not implemented.');
     }
 
 }

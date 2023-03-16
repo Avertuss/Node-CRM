@@ -5,3 +5,4 @@ yarn.lock
 packages/**/yarn.lock
 packages/**/yarn-error.log
 package-lock.json
+dist
