@@ -56,6 +56,7 @@ export interface IColumns
 export interface IShema 
 {
     name:string,
+    primaryKey:string,
     alias?:string,
     columns:IColumns,
     where?:WhereChainType

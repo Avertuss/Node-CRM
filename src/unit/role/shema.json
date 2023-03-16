@@ -1,9 +1,11 @@
 {
     "name": "role",
+    "primaryKey":"id",
     "columns": {
         "id": {
             "type": "bigint",
-            "primaryKey": true
+            "primaryKey":true,
+            "select":false
         },
         "name": {
             "type": "nvarchar",

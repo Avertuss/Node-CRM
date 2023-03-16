@@ -1,6 +1,6 @@
 import {Filter, ICurdRepository, Page, toPage} from '../../base'
 import {RoleEntity,PermissionEntity} from './Entity';
-import { Bulder, IShema } from '../../json-sql';
+import { Bulder, IShema } from '../../json-sql'
 
 export class  RoleRepository implements ICurdRepository<number, RoleEntity<number>>
 {
@@ -58,7 +58,7 @@ export class  RoleRepository implements ICurdRepository<number, RoleEntity<numbe
         });
     }
     getAll(filter: Filter): Promise<Array<RoleEntity>> {
-        let sql = this.builder.select().build();
+        let sql = this.builder.select().where().build();
         console.log(sql);
         return new Promise((resolve)=>{
             resolve(Array.from<RoleEntity>(this.cache.values()));

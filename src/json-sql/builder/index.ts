@@ -4,7 +4,7 @@ const SHEMA_DEFAULT_NAME = "dbo"
 
 
 function whereToSQL(where: IFilter, index?: number) {
-    return `[${( where.column as SQLColumn).alias}].[${( where.column as SQLColumn).name}] ${where.comparison} $${index}`;
+    return `[${( where.column as SQLColumn).table}].[${( where.column as SQLColumn).name}] ${where.comparison} $${index}`;
 }
 function concatTableName(tableName: string, tableAlias: string, shema: string = SHEMA_DEFAULT_NAME) {
     return `[${shema}].[${tableName}] as [${tableAlias ? tableAlias : tableName}]`;
@@ -17,6 +17,26 @@ function toWhere(comparison: Comparison, col: SQLColumn): SQLWhere {
         column: col,
         comparison: comparison,
     } as SQLWhere
+}
+function  generateSelectSQLColumn(key: string, col: IColumn, tableAlias: string): Array<SQLColumn> {
+
+    let sqlColumn = Array<SQLColumn>();
+    if (col && typeof col === "object") {
+        if (typeof (col as IColumnDictionary)?.table === "string") {
+            let colDictionary: IColumnDictionary = col as IColumnDictionary
+            sqlColumn.push({ table: tableAlias, name: (key + "Id"), alias: (key + "Id") });
+            sqlColumn.push({ table: colDictionary.table, name: colDictionary.display, alias: (key + colDictionary.display) });
+        } else {
+
+            let colBase: IColumnBase = col as IColumnBase;
+            let sqlCol: SQLColumn = { table:tableAlias, name: key, alias: colBase?.alias ? colBase.alias : key };
+            sqlColumn.push(sqlCol);
+        }
+    }
+    else {
+        sqlColumn.push({ table: tableAlias, name: key, alias: key });
+    }
+    return sqlColumn;
 }
 function generateSQLWhere(whereChain: WhereChainType,indexSequens: number= 1): string {
     let WHERE_SQL = ""
@@ -65,7 +85,7 @@ class SelectBuilder {
         columnsKeys.filter(key => typeof columns[key] === "string" || typeof columns[key] === "object" &&
             (typeof (columns[key] as IColumn)?.select === "undefined" || (columns[key] as IColumn)?.select == true)
         )
-            .map(key => this.generateSelectSQLColumn(key, typeof columns[key] === "object" ? (columns[key] as IColumn) : null));
+            .forEach((key) => this.SHEMA_COLUMNS_SELECT.push(...generateSelectSQLColumn(key, typeof columns[key] === "object" ? (columns[key] as IColumn) : null, this.TABLE_ALIAS)));
 
         this.SHEMA_WHERE.length > 0 ? (this.SHEMA_WHERE = []) : null;
         return this;
@@ -79,38 +99,28 @@ class SelectBuilder {
      
         return this;
     }
-    public where(filter: WhereChainType): SelectBuilder {
+    public where(filter?: WhereChainType): SelectBuilder {
+        if(filter !=null ){ 
+            if (this.SHEMA_WHERE.length > 0) {
+                this.SHEMA_WHERE = [[...this.SHEMA_WHERE], Operator.AND, [...filter] ]
+            }else {
+                this.SHEMA_WHERE = filter
+            }
+        }
         return this;
     }
 
     public build(): string {
         this.indexValue = 1;
         console.log(this.SHEMA_WHERE);
-        return this.buildSelect() + generateSQLWhere(this.SHEMA_WHERE)
-
+        return this.buildSelect() + ( this.SHEMA_WHERE.length > 0 ? " WHERE "+generateSQLWhere(this.SHEMA_WHERE) : "" ) 
     }
     private buildSelect(): string {
         this.SELECT_SQL = "SELECT " + this.SHEMA_COLUMNS_SELECT.map(concatColName).join(",") + " FROM "
             + concatTableName(this.shema.name, this.shema.alias);
         return this.SELECT_SQL;
     }
-    private generateSelectSQLColumn(key: string, col: IColumn): void {
-
-        if (col && typeof col === "object") {
-            if (typeof (col as IColumnDictionary)?.table === "string") {
-                let colDictionary: IColumnDictionary = col as IColumnDictionary
-                this.SHEMA_COLUMNS_SELECT.push({ table: this.TABLE_ALIAS, name: (key + "Id"), alias: (key + "Id") });
-                this.SHEMA_COLUMNS_SELECT.push({ table: colDictionary.table, name: colDictionary.display, alias: (key + colDictionary.display) });
-            } else {
-
-                let colBase: IColumnBase = col as IColumnBase;
-                this.SHEMA_COLUMNS_SELECT.push({ table: this.TABLE_ALIAS, name: key, alias: colBase?.alias ? colBase.alias : key });
-            }
-        }
-        else {
-            this.SHEMA_COLUMNS_SELECT.push({ table: this.TABLE_ALIAS, name: key, alias: key });
-        }
-    }
+   
 }
 
 export class Bulder {
