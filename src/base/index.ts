@@ -1,10 +1,9 @@
-import { Request, Response } from 'express';
-
+import { Request } from 'express';
+import {PageableByFilter , Pageable} from '../json-sql';
 import * as core from 'express-serve-static-core';
 
 export interface IRepository<T,E>{
 }
-
 export interface IBaseResponse<T>
 {
     id:T
@@ -14,13 +13,6 @@ export interface IBaseRequest
 {
     name:string
 }
-export interface Filter
-{
-    count?:Number
-    startIndex?:Number
-    size?:Number 
-}
-
 export interface Page<E>
 {
     data:Array<E>
@@ -41,7 +33,8 @@ export interface IBaseService<T, E>
     update(id:string,request:T):Promise<E>
     delete(id:string):Promise<E>
     getById(id:string):Promise<E>
-    getAll(filter:Filter):Promise<Page<E>>
+    getAll(pageable:Pageable):Promise<Page<E>>
+    getPageableByFilter(filter:PageableByFilter):Promise<Page<E>>
 }
 export interface ICurdRepository<T,E>
 {
@@ -50,7 +43,8 @@ export interface ICurdRepository<T,E>
     update(entity:E):Promise<E>
     delete(id:T):Promise<E>
     getById(id:T):Promise<E>
-    getAll(filter:Filter):Promise<Array<E>>
+    getAll(pageable:Pageable):Promise<Array<E>>
+    getPageableByFilter(filter:PageableByFilter):Promise<Array<E>>
 }
 export enum LVL 
 {
@@ -89,8 +83,6 @@ export interface IRequestTypeBody<T> extends IRequest
 {
     body:T
 }
-
-
 export function toPage<E>(array:Array<E>):Page<E>
 {
   return { data:array, count: array.length };

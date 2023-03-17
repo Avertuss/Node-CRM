@@ -1,8 +1,8 @@
 import express, { Request, Response, Router, NextFunction, RequestHandler } from 'express';
 
-import { Filter, IRequest, Permission, LVL } from '../base';
+import {  IRequest, Permission, LVL } from '../base';
 import {IDictionaryService} from './types';
-
+import {Pageable} from '../json-sql';
 const router: Router = express.Router();
 
 const isPemite = function (lvl: number): RequestHandler {
@@ -23,7 +23,7 @@ export default function(roleServise: IDictionaryService) {
 
     router.get("/dictionary/:folder/:dictionary", isPemite(LVL.READ)
     , async function (req: IRequest, res: Response, next: NextFunction) {
-        const data = await roleServise.getAll(req.query as Filter);
+        const data = await roleServise.getAll(req.query as Pageable);
         res.send(data);
     });
     

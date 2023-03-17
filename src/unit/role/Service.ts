@@ -1,14 +1,18 @@
-import { Filter, Page } from '../../base';
+import {  Page, toPage } from '../../base';
 import { IRoleRequest, IRoleResponse, IRoleService, IPermission } from './types';
 import { RoleRepository } from './RoleRepository';
 import { RoleEntity } from './Entity';
-
+import {PageableByFilter , Pageable} from '../../json-sql';
 
 
 export class RoleService implements IRoleService {
     roleRepository: RoleRepository
     constructor(roleRepository: RoleRepository) {
         this.roleRepository = roleRepository;
+    }
+    async getPageableByFilter(filter: PageableByFilter): Promise<Page<IRoleResponse<number>>> {
+        let elements =  await this.roleRepository.getPageableByFilter(filter);
+        return toPage(elements.map(this.convertToIRoleResponse));
     }
     
     async getById(id: string): Promise<IRoleResponse>{
@@ -17,7 +21,7 @@ export class RoleService implements IRoleService {
 
         return this.convertToIRoleResponse(entity);
     }
-    async getAll(filter: Filter): Promise<Page<IRoleResponse>> {
+    async getAll(filter: Pageable): Promise<Page<IRoleResponse>> {
         let elements =  await this.roleRepository.getAll(filter);
         let page = { data : elements.map(e=>this.convertToIRoleResponse(e)), count: elements.length}
         return page;

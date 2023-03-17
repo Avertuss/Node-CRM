@@ -1,5 +1,6 @@
-import {Filter, IRepository, Page} from '../../base'
+import { IRepository, Page} from '../../base'
 import {RoleEntity} from './Entity';
+import {PageableByFilter , Pageable} from '../../json-sql';
 export class  RoleRepository implements IRepository<string, RoleEntity>
 {
     cache: Map<String,RoleEntity>;
@@ -23,7 +24,7 @@ export class  RoleRepository implements IRepository<string, RoleEntity>
     getById(id: string): RoleEntity {
         return this.cache.get(id);
     }
-    getAll(filter: Filter): Page<RoleEntity> {
+    getAll(filter: Pageable): Page<RoleEntity> {
         throw new Error('Method not implemented.');
     }
 

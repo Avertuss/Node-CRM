@@ -1,6 +1,6 @@
-import {Filter, ICurdRepository, Page, toPage} from '../../base'
-import {RoleEntity,PermissionEntity} from './Entity';
-import { Bulder, IShema } from '../../json-sql'
+import { ICurdRepository, Page} from '../../base'
+import {RoleEntity} from './Entity';
+import { Bulder, IShema, PageableByFilter , Pageable } from '../../json-sql'
 
 export class  RoleRepository implements ICurdRepository<number, RoleEntity<number>>
 {
@@ -51,14 +51,22 @@ export class  RoleRepository implements ICurdRepository<number, RoleEntity<numbe
     }
     getById(id: number): Promise<RoleEntity> {
 
-        let sql = this.builder.select().byId().build();
+        let sql = this.builder.select().byId(id).build();
         console.log(sql);
         return new Promise((resolve)=>{
             resolve(this.cache.get(id));
         });
     }
-    getAll(filter: Filter): Promise<Array<RoleEntity>> {
-        let sql = this.builder.select().where().build();
+    getAll(pageable:Pageable): Promise<Array<RoleEntity>> {
+        let sql = this.builder.select().byPage(pageable).build();
+        console.log(sql);
+        return new Promise((resolve)=>{
+            resolve(Array.from<RoleEntity>(this.cache.values()));
+        });
+    }
+    getPageableByFilter(filter:PageableByFilter):Promise<Array<RoleEntity>>
+    {
+        let sql = this.builder.select().where(filter).build();
         console.log(sql);
         return new Promise((resolve)=>{
             resolve(Array.from<RoleEntity>(this.cache.values()));

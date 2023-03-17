@@ -48,7 +48,16 @@ export interface IFilter {
     value?:any,
 } 
 export type WhereChainType = Array<IFilter | Operator | WhereChainType> ;
-
+export interface PageableByFilter extends Pageable
+{
+    filter:WhereChainType
+}
+export interface Pageable
+{
+    count?:Number
+    start?:Number
+    size?:Number 
+}
 export interface IColumns 
 {
     [key:string]:IColumn | string
@@ -60,4 +69,10 @@ export interface IShema
     alias?:string,
     columns:IColumns,
     where?:WhereChainType
+}
+export type SQLValues<T=any> = Array<T>;
+export type SQLMeta =
+{
+    sql: string
+    value?:SQLValues
 }

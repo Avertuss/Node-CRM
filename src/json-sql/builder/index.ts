@@ -1,22 +1,28 @@
-import { IShema, IColumns, IColumn, IColumnDictionary, IColumnBase, IFilter, WhereChainType, Comparison, Operator, SQLColumn, SQLWhere } from '../type';
+import { IShema, IColumns, IColumn, PageableByFilter, Pageable,
+     IColumnDictionary,SQLMeta, SQLValues, IColumnBase,
+      IFilter, WhereChainType, Comparison, Operator,
+       SQLColumn, SQLWhere } from '../type';
 
 const SHEMA_DEFAULT_NAME = "dbo"
 
 
 function whereToSQL(where: IFilter, index?: number) {
-    return `[${( where.column as SQLColumn).table}].[${( where.column as SQLColumn).name}] ${where.comparison} $${index}`;
+    console.log(where.comparison);
+    let wherFilter: string = `[${( where.column as SQLColumn).table}].[${( where.column as SQLColumn).name}] ${where.comparison}`;
+    if(where.comparison == Comparison.IS_NULL || where.comparison == Comparison.NOT_NULL ){
+     
+    }else if(where.comparison == Comparison.LIKE ){
+        wherFilter+=` '%'||$${index}||'%'`;
+    }else {
+        wherFilter+=` $${index}`;
+    }
+    return wherFilter;
 }
 function concatTableName(tableName: string, tableAlias: string, shema: string = SHEMA_DEFAULT_NAME) {
     return `[${shema}].[${tableName}] as [${tableAlias ? tableAlias : tableName}]`;
 }
 function concatColName(col: SQLColumn): string {
     return `[${col.table}].[${col.name}] ${col.alias ? `as [${col.alias}]` : ""}`;
-}
-function toWhere(comparison: Comparison, col: SQLColumn): SQLWhere {
-    return {
-        column: col,
-        comparison: comparison,
-    } as SQLWhere
 }
 function  generateSelectSQLColumn(key: string, col: IColumn, tableAlias: string): Array<SQLColumn> {
 
@@ -27,7 +33,6 @@ function  generateSelectSQLColumn(key: string, col: IColumn, tableAlias: string)
             sqlColumn.push({ table: tableAlias, name: (key + "Id"), alias: (key + "Id") });
             sqlColumn.push({ table: colDictionary.table, name: colDictionary.display, alias: (key + colDictionary.display) });
         } else {
-
             let colBase: IColumnBase = col as IColumnBase;
             let sqlCol: SQLColumn = { table:tableAlias, name: key, alias: colBase?.alias ? colBase.alias : key };
             sqlColumn.push(sqlCol);
@@ -38,14 +43,18 @@ function  generateSelectSQLColumn(key: string, col: IColumn, tableAlias: string)
     }
     return sqlColumn;
 }
-function generateSQLWhere(whereChain: WhereChainType,indexSequens: number= 1): string {
+function generateSQLWhere(whereChain: WhereChainType,columns: Array<SQLColumn>,values: SQLValues, indexSequens: number= 1): string {
     let WHERE_SQL = ""
         whereChain.forEach(e => {
             if ((e as IFilter).column) {
                 let fil: IFilter = e  as IFilter;
+                fil.column = columns.find(e=>e.name === fil.column);
+                if(fil.value){
+                    values.push(fil.value);
+                }
                 WHERE_SQL+=" "+whereToSQL(fil,indexSequens++);
             } else if (Array.isArray(e)) {
-                WHERE_SQL+=" ( "+generateSQLWhere(e as WhereChainType, indexSequens)+" ) ";
+                WHERE_SQL+=" ( "+generateSQLWhere(e as WhereChainType,columns,values, indexSequens)+" ) ";
             } else if (Object.values(Operator).includes(e as Operator)) {
                 WHERE_SQL+=" "+(e as Operator);
             }
@@ -72,12 +81,18 @@ class SelectBuilder {
     private whereBuilder: WhereBuilder;
     private id: SQLColumn;
     private indexValue:number = 1;
+    private sqlValue: SQLValues =[]
+    private CLEAR_WHERE: boolean = false;
     constructor(shema: IShema) {
         this.shema = shema;
         this.TABLE_ALIAS = shema.alias ? shema.alias : shema.name;
         this.select(shema.columns);
         this.whereBuilder = new WhereBuilder(shema.where);
-
+        let primaryCol = shema.columns[shema.primaryKey] ;
+        this.id = generateSelectSQLColumn(shema.primaryKey, typeof primaryCol === "object" ? (primaryCol as IColumn) : null, this.TABLE_ALIAS)[0];
+        if(!this.id ){
+            throw new Error(`Primaty key not found in ${shema.name} `);
+        }
     }
     public select(columns: IColumns): SelectBuilder {
         const columnsKeys = Object.keys(columns);
@@ -86,20 +101,27 @@ class SelectBuilder {
             (typeof (columns[key] as IColumn)?.select === "undefined" || (columns[key] as IColumn)?.select == true)
         )
             .forEach((key) => this.SHEMA_COLUMNS_SELECT.push(...generateSelectSQLColumn(key, typeof columns[key] === "object" ? (columns[key] as IColumn) : null, this.TABLE_ALIAS)));
-
-        this.SHEMA_WHERE.length > 0 ? (this.SHEMA_WHERE = []) : null;
+        if(this.CLEAR_WHERE){
+            this.SHEMA_WHERE.length > 0 ? (this.SHEMA_WHERE = []) : null;
+            this.sqlValue = [];
+        }
         return this;
     }
-    public byId(): SelectBuilder {
+    public byId(id: number): SelectBuilder {
         if (this.SHEMA_WHERE.length > 0) {
             this.SHEMA_WHERE = [[{ column: this.id, comparison: Comparison.EQUALS }], Operator.AND, [...this.SHEMA_WHERE]]
         } else {
             this.SHEMA_WHERE = [{ column: this.id, comparison: Comparison.EQUALS }]
         }
-     
+        this.sqlValue.push(id);
         return this;
     }
-    public where(filter?: WhereChainType): SelectBuilder {
+    public byPage(page: Pageable): SelectBuilder {
+        return this;
+
+    }
+    public where(pageableByFilter?: PageableByFilter): SelectBuilder {
+        let filter = pageableByFilter.filter;
         if(filter !=null ){ 
             if (this.SHEMA_WHERE.length > 0) {
                 this.SHEMA_WHERE = [[...this.SHEMA_WHERE], Operator.AND, [...filter] ]
@@ -110,14 +132,14 @@ class SelectBuilder {
         return this;
     }
 
-    public build(): string {
+    public build(): SQLMeta {
         this.indexValue = 1;
-        console.log(this.SHEMA_WHERE);
-        return this.buildSelect() + ( this.SHEMA_WHERE.length > 0 ? " WHERE "+generateSQLWhere(this.SHEMA_WHERE) : "" ) 
+        let sql =  this.buildSelect() + ( this.SHEMA_WHERE.length > 0 ? " WHERE "+generateSQLWhere(this.SHEMA_WHERE,this.SHEMA_COLUMNS_SELECT,this.sqlValue) : "" );
+        return {"sql":sql, value:this.sqlValue};
     }
     private buildSelect(): string {
-        this.SELECT_SQL = "SELECT " + this.SHEMA_COLUMNS_SELECT.map(concatColName).join(",") + " FROM "
-            + concatTableName(this.shema.name, this.shema.alias);
+        this.SELECT_SQL = "SELECT " + this.SHEMA_COLUMNS_SELECT.map(concatColName).join(",") +
+         " FROM " + concatTableName(this.shema.name, this.shema.alias);
         return this.SELECT_SQL;
     }
    
@@ -125,7 +147,6 @@ class SelectBuilder {
 
 export class Bulder {
     private shema: IShema
-
     private selectlBuilder: SelectBuilder;
 
     constructor(shema: IShema) {

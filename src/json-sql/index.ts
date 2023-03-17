@@ -1,4 +1,4 @@
 import { Bulder } from './builder';
-import {IShema} from './type';
+import {IShema, WhereChainType, Pageable, PageableByFilter} from './type';
 
-export {Bulder,IShema}
+export {Bulder,IShema, WhereChainType, Pageable, PageableByFilter}

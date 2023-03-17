@@ -1,5 +1,6 @@
 {
     "name":"contact",
+    "primaryKey":"id",
     "columns":{
         "id": {
             "type":"bigint",

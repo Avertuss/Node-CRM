@@ -4,7 +4,6 @@ import Authorization from './authorization';
 import VerifyRoute from './verifyrouter';
 import {roleController} from './unit/role';
 
-import {Controller} from './dictionarys';
 
 dotenv.config();
 const app: Express = express();
@@ -21,7 +20,7 @@ app.use(VerifyRoute);
 
 app.use(roleController);
 
-app.use(Controller);
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
