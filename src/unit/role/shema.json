@@ -17,6 +17,11 @@
             "size": 250,
             "notNull": true
         },
+        "type":{
+            "type":"bigint",
+            "display":"name",
+            "table":"role_type"
+        },
         "permission": {
             "type": "bigint",
             "joinTable": {

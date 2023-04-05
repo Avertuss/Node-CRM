@@ -1,5 +1,5 @@
 import RoleController from './RoleController';
-import {RoleService} from './Service';
+import {RoleService} from './RoleService';
 import {RoleRepository} from './RoleRepository';
 import shema from './shema.json';
 import { IShema } from '../../json-sql';

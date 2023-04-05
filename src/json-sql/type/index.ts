@@ -9,6 +9,10 @@ export interface IColumnDictionary extends IColumn
     table?:string,
     display?:string
 }
+export interface IColumnJoin extends IColumn
+{
+    table: string
+}
 export interface IColumnBase extends IColumn
 {
     alias?:string,
@@ -16,7 +20,9 @@ export interface IColumnBase extends IColumn
     size?:number,
     notNull?:boolean
 }
-
+export enum JOIN {
+    LEFT = <any>"LEFT JOIN"
+}
 export enum Comparison {
     EQUALS =  <any>"=",
     LESS =  <any>"<",
@@ -42,12 +48,18 @@ export enum Operator {
     OR = <any>"OR",
     NOT_EQUALS= <any>"<>",
 }
+
 export interface IFilter {
-    column:string | SQLColumn,
+    col:string | SQLColumn,
     comparison:Comparison,
     value?:any,
 } 
-export type WhereChainType = Array<IFilter | Operator | WhereChainType> ;
+export interface IFilterColumns {
+    colA:string ,
+    comparison:Comparison,
+    colB:string,
+} 
+export type WhereChainType = Array<IFilter | IFilterColumns | Operator | WhereChainType> ;
 export interface PageableByFilter extends Pageable
 {
     filter:WhereChainType
